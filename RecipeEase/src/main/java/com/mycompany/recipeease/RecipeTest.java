@@ -141,7 +141,7 @@ public class RecipeTest {
         loggedInUser = null;
     }
     
-    //Menu khusus untuk admin
+     //Menu khusus untuk admin
     private static void adminOptions() {
         int adminChoice;
         Administrator admin = (Administrator) loggedInUser;
@@ -165,43 +165,83 @@ public class RecipeTest {
     
     //untuk mengelola komentar oleh admin
     private static void manageComments(Administrator admin) {
-        System.out.println("\n--- Manage Comments ---");
-        System.out.print("Action (tambah/hapus/lihat): ");
-        String action = scanner.nextLine();
-        if (action.equalsIgnoreCase("tambah")) {
+    System.out.println("\n--- Manage Comments ---");
+    System.out.println("1. View Comments");
+    System.out.println("2. Add Comment");
+    System.out.print("Enter your choice: ");
+    int choice = scanner.nextInt();
+    scanner.nextLine(); // Consume newline
+
+    switch (choice) {
+        case 1 -> {
+            List<Comment> comments = community.getComments();
+            if (comments.isEmpty()) {
+                System.out.println("No comments available.");
+            } else {
+                for (Comment comment : comments) {
+                    System.out.println("ID: " + comment.getCommentID() +
+                            ", Author: " + comment.getAuthor() +
+                            ", Content: " + comment.getContent());
+                }
+            }
+        }
+        case 2 -> {
             System.out.print("Enter Comment Content: ");
-            String comment = scanner.nextLine();
-            admin.manageComments(action, comment);
-        } else if (action.equalsIgnoreCase("hapus")) {
-            System.out.print("Enter Comment Content to Remove: ");
-            String comment = scanner.nextLine();
-            admin.manageComments(action, comment);
-        } else if (action.equalsIgnoreCase("lihat")) {
-            admin.manageComments(action, "");
-        } else {
-            System.out.println("Invalid action. Please try again.");
+            String content = scanner.nextLine();
+            System.out.print("Enter Author: ");
+            String author = scanner.nextLine();
+            Comment newComment = new Comment(community.getComments().size() + 1, content, author, new Date());
+            community.addComment(newComment);
+            System.out.println("Comment added successfully.");
         }
     }
+}
+
     
     //untuk mengelola pengguna oleh admin
     private static void manageUsers(Administrator admin) {
         System.out.println("\n--- Manage Users ---");
-        System.out.print("Action (tambah/blokir/lihat): ");
-        String action = scanner.nextLine();
-        if (action.equalsIgnoreCase("tambah")) {
-            System.out.print("Enter Username to Add: ");
-            String user = scanner.nextLine();
-            admin.manageUsers(action, user);
-        } else if (action.equalsIgnoreCase("blokir")) {
-            System.out.print("Enter Username to Block: ");
-            String user = scanner.nextLine();
-            admin.manageUsers(action, user);
-        } else if (action.equalsIgnoreCase("lihat")) {
-            admin.manageUsers(action, "");
-        } else {
-            System.out.println("Invalid action. Please try again.");
+    System.out.println("1. View All Users");
+    System.out.println("2. Add User");
+    System.out.println("3. Block User");
+    System.out.print("Enter your choice: ");
+    int choice = scanner.nextInt();
+    scanner.nextLine();
+
+    switch (choice) {
+        case 1 -> {
+            if (userList.isEmpty()) {
+                System.out.println("No users available.");
+            } else {
+                for (User user : userList) {
+                    System.out.println("ID: " + user.getUserID() + " | Username: " + user.getUsername() + " | Role: " + user.getRole());
+                }
+            }
         }
+        case 2 -> {
+            System.out.print("Enter Username: ");
+            String username = scanner.nextLine();
+            System.out.print("Enter Password: ");
+            String password = scanner.nextLine();
+            System.out.print("Enter Email: ");
+            String email = scanner.nextLine();
+            User newUser = new User(userList.size() + 1, username, password, email, "user");
+            userList.add(newUser);
+            System.out.println("User added successfully.");
+        }
+        case 3 -> {
+            System.out.print("Enter Username to Block: ");
+            String username = scanner.nextLine();
+            boolean removed = userList.removeIf(user -> user.getUsername().equals(username));
+            if (removed) {
+                System.out.println("User blocked successfully.");
+            } else {
+                System.out.println("User not found.");
+            }
+        }
+        default -> System.out.println("Invalid choice. Please try again.");
     }
+}
     
     //untuk menambahkan resep baru.
     private static void addRecipe() {
@@ -397,16 +437,14 @@ public class RecipeTest {
     private static void viewAllRecipeDetails() {
     System.out.println("\n--- View All Recipe Details ---");
     if (recipeList.isEmpty()) {
-        System.out.println("No recipes available.");
-        return;
-    }
+            System.out.println("No recipes available.");
+        } else {
+            for (Recipe recipe : recipeList) {
+                System.out.println(recipe);
+            }
+        }
 
     for (Recipe recipe : recipeList) {
-        System.out.println("Recipe ID: " + recipe.getRecipeID());
-        System.out.println("Title: " + recipe.getTitle());
-        System.out.println("Ingredients: " + recipe.getIngredients());
-        System.out.println("Instructions: " + recipe.getInstructions());
-
         // Display comments
         System.out.println("Comments:");
         boolean hasComments = false;
